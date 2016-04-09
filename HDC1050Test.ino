@@ -23,7 +23,7 @@ void setup() {
   Serial.println(hdcSensor.batteryOK());
 
   hdcSensor.turnOnHeater(true);
-  hdcSensor.setTemperatureRes(HDC1050::T_RES_12);
+  hdcSensor.setTemperatureRes(HDC1050::T_RES_14);
   hdcSensor.setHumidityRes(HDC1050::H_RES_8);
   hdcSensor.updateConfigRegister();
 }
