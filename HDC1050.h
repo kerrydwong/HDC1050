@@ -37,6 +37,7 @@ public:
 	static const byte H_RES_8 = 2;
 	
 	HDC1050();
+	bool isConnected();
 	unsigned int getManufacturerID();
 	unsigned int getDeviceID();
 	String getSerialID();
