@@ -13,6 +13,17 @@ HDC1050::HDC1050()
 	configReg = 0x10; //POR default
 }
 
+bool HDC1050::isConnected()
+{
+	byte ret;
+
+	Wire.beginTransmission(Addr);
+	ret = Wire.endTransmission();
+	if ((ret == 0) && (getManufacturerID() == 0x5449))
+		return true;
+	return false;
+}
+
 void HDC1050::readRegister(byte regAddr, byte numOfBytes)
 {
 	Wire.beginTransmission(Addr);
