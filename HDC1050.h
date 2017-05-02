@@ -35,7 +35,7 @@ public:
 	static const byte H_RES_14 = 0;
 	static const byte H_RES_11 = 1;
 	static const byte H_RES_8 = 2;
-	
+
 	HDC1050();
 	bool isConnected();
 	unsigned int getManufacturerID();
@@ -47,10 +47,10 @@ public:
 	bool batteryOK();
 	float getTemperatureHumidity(float &t, float &h);
 	void updateConfigRegister();
-	void readRegister(byte regAddr, byte numOfBytes);
+	bool readRegister(byte regAddr, byte numOfBytes, int retryCount);
 
 	byte configReg; //higher 8 bits of the configuration register
-	byte buf[4];		
+	byte buf[4];
 private:
 };
 #endif

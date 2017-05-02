@@ -24,8 +24,19 @@ bool HDC1050::isConnected()
 	return false;
 }
 
-void HDC1050::readRegister(byte regAddr, byte numOfBytes)
+bool HDC1050::readRegister(byte regAddr, byte numOfBytes, int retryCount = 200)
 {
+	/* Input:
+	*     regAddr: I2C internal register address to read from 
+	*     numOfBytes: number of bytes to read from register
+	*     retryCount: retryCount times for I2C connection to be up & running
+	* Output:
+	*     return 'true' if read was with success
+	*            'false' if cannot read data from I2C register
+	* Remarks:
+	*     read information to HDC1050 variable 'buf'
+	*/
+
 	Wire.beginTransmission(Addr);
 	Wire.write(regAddr);
 	Wire.endTransmission();
@@ -35,36 +46,51 @@ void HDC1050::readRegister(byte regAddr, byte numOfBytes)
 	}
 
 	Wire.requestFrom(Addr, numOfBytes);
-	
-	while (!Wire.available());
-	
+
+	while (!Wire.available() && retryCount > 0) {
+	    delay(5);
+	    retryCount--;
+	}
+	if (retryCount == 0)
+	    return false;
+
 	for (int i=0; i < numOfBytes; i++) {
 		buf[i] = Wire.read();
 	}
+	return true;
 }
 
 unsigned int HDC1050::getManufacturerID()
 {
-	readRegister(REG_ManufactureID, 2);
-	return buf[0] << 8 | buf[1];
+	if (readRegister(REG_ManufactureID, 2)) 
+		return buf[0] << 8 | buf[1];
+	else
+		return 0;
 }
 
 unsigned int HDC1050::getDeviceID()
 {
-	readRegister(REG_DeviceID, 2);
-	return buf[0] << 8 | buf[1];
+	if (readRegister(REG_DeviceID, 2))
+		return buf[0] << 8 | buf[1];
+	else
+		return 0;
 }
 
 String HDC1050::getSerialID()
 {
-	readRegister(REG_SER_1, 2);
+	bool success = true;
+
+	success = success && readRegister(REG_SER_1, 2);
 	String s1 = String(buf[0] << 8 | buf[1], HEX);
-	readRegister(REG_SER_2, 2);
+	success = success && readRegister(REG_SER_2, 2);
 	String s2 = String(buf[0] << 8 | buf[1], HEX);
-	readRegister(REG_SER_3, 2);
+	success = success && readRegister(REG_SER_3, 2);
 	String s3 = String(buf[0] << 8 | buf[1], HEX);
-	
-	return String(s1 + s2 + s3);
+
+	if (success)
+		return String(s1 + s2 + s3);
+	else
+		return String("");
 }
 
 void HDC1050::updateConfigRegister()
@@ -104,7 +130,7 @@ bool HDC1050::batteryOK()
 {
 	readRegister(REG_Config, 2);
 	configReg = buf[0];
-	
+
 	return (configReg & (1 << BIT_BATTERY_OK)) == 0;
 }
 
