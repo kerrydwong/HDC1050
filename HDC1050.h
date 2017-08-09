@@ -47,6 +47,8 @@ public:
 	bool batteryOK();
 	float getTemperatureHumidity(float &t, float &h);
 	void updateConfigRegister();
+	void readConfigRegister();
+	void reset();
 	void readRegister(byte regAddr, byte numOfBytes);
 
 	byte configReg; //higher 8 bits of the configuration register
