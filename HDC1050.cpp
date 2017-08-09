@@ -76,6 +76,25 @@ void HDC1050::updateConfigRegister()
 	Wire.endTransmission();
 }
 
+void HDC1050::readConfigRegister()
+{
+	readRegister(REG_Config, 2);
+	configReg = buf[0];
+}
+
+void HDC1050::reset()
+{
+        // perform sensor soft reset
+        configReg |= 1 << BIT_RST;
+	updateConfigRegister();
+	// wait for sensor to restart (datasheet lists max time as 15ms)
+	delay(25);
+
+	// restore configuration register values
+	configReg &= ~(1 << BIT_RST);
+	updateConfigRegister();
+}
+
 void HDC1050::setTemperatureRes(byte res) 
 {
 	if (res > 1) res = T_RES_14;
@@ -102,9 +121,7 @@ void HDC1050::turnOnHeater(bool heaterOn)
 
 bool HDC1050::batteryOK()
 {
-	readRegister(REG_Config, 2);
-	configReg = buf[0];
-	
+	readConfigRegister();
 	return (configReg & (1 << BIT_BATTERY_OK)) == 0;
 }
 
